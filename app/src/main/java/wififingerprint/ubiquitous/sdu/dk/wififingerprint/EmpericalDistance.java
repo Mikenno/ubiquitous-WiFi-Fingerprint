@@ -1,8 +1,8 @@
 package wififingerprint.ubiquitous.sdu.dk.wififingerprint;
 
+import android.location.Location;
 import android.net.wifi.ScanResult;
-
-import com.google.android.gms.location.LocationResult;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +53,8 @@ public class EmpericalDistance {
 			count++;
 		}
 
+		Log.d("TAG_ubi", resultErrors.keySet().toString());
+
 		return resultList;
 	}
 
@@ -65,12 +67,27 @@ public class EmpericalDistance {
 	}
 
 	public static Map<String, Double> getLocationPrediction(List<WiFiFingerprint> wiFiFingerprints) {
-		//TODO: return the average between all locations
+		//TODO: handle empty list...
 		Map<String, Double> result = new HashMap<>();
-		LocationResult locationResult = wiFiFingerprints.get(wiFiFingerprints.size()-1).getLocationResult();
-		result.put("lati", locationResult.getLastLocation().getLatitude());
-		result.put("long", locationResult.getLastLocation().getLongitude());
-		result.put("alti", locationResult.getLastLocation().getAltitude());
+
+		double latitude = 0;
+		double longitude = 0;
+		double altitude = 0;
+
+		for (WiFiFingerprint wiFiFingerprint : wiFiFingerprints) {
+			Location location = wiFiFingerprint.getLocationResult().getLastLocation();
+			latitude += location.getLatitude();
+			longitude += location.getLongitude();
+			altitude += location.getAltitude();
+		}
+
+		latitude = latitude / wiFiFingerprints.size();
+		longitude = longitude / wiFiFingerprints.size();
+		altitude = altitude / wiFiFingerprints.size();
+
+		result.put("latitude", latitude);
+		result.put("longitude", longitude);
+		result.put("altitude", altitude);
 		return result;
 	}
 }
