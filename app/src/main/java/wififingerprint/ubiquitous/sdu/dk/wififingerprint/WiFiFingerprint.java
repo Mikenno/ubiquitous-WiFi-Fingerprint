@@ -32,6 +32,14 @@ public class WiFiFingerprint {
 		return sb.toString();
 	}
 
+	public List<ScanResult> getScanResults() {
+		return scanResults;
+	}
+
+	public LocationResult getLocationResult() {
+		return locationResult;
+	}
+
 	@Override
 	public String toString() {
 		return String.format(Locale.ENGLISH, "%d, %s, %s", System.currentTimeMillis(), getLoggableLocationResult(locationResult), getLoggableScanResults(scanResults));

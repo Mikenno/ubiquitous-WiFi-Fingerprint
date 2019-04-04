@@ -1,12 +1,19 @@
 package wififingerprint.ubiquitous.sdu.dk.wififingerprint;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 			DataLogger fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
 			GPSManager gpsManager = new GPSManager(this, fingerprintDataLogger);
 			setupButtons(gpsManager);
-
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
 			requestPermissions();
@@ -50,10 +56,14 @@ public class MainActivity extends AppCompatActivity {
 	private void setupButtons(final GPSManager gpsManager) {
 		final Button btn_startCollectingWiFiFingerprints = findViewById(R.id.btn_start_collect_WiFi_fingerprints);
 		final Button btn_stopCollectingWiFiFingerprints = findViewById(R.id.btn_stop_collect_WiFi_fingerprints);
+
+		final Button btn_predictPosition = findViewById(R.id.btn_predict_position);
+
+		final TextView textView_predictedLocation = findViewById(R.id.textView_predicted_location);
+
 		btn_stopCollectingWiFiFingerprints.setEnabled(false);
 
 		btn_startCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				gpsManager.startLocationRequest();
@@ -63,12 +73,23 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		btn_stopCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				gpsManager.stopLocationRequests();
 				btn_startCollectingWiFiFingerprints.setEnabled(true);
 				btn_stopCollectingWiFiFingerprints.setEnabled(false);
+			}
+		});
+
+		btn_predictPosition.setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+				List<ScanResult> results =  wifiManager.getScanResults();
+				List<WiFiFingerprint> kNearest = EmpericalDistance.getkNearest(results, gpsManager.getWiFiFingerprints(), 5);
+				Map<String, Double> predictedLocation = EmpericalDistance.getLocationPrediction(kNearest);
+				textView_predictedLocation.setText(predictedLocation.toString());
 			}
 		});
 	}
