@@ -13,11 +13,13 @@ import java.util.Locale;
 
 public class DataLogger {
 	private Context context;
+	private String baseFilename;
 	private PrintWriter logger;
 	private final String TAG = "TAG_ubi";
 
-	public DataLogger(Context context) {
+	public DataLogger(Context context, String baseFilename) {
 		this.context = context;
+		this.baseFilename = baseFilename;
 	}
 
 	public void log(String message) {
@@ -33,7 +35,7 @@ public class DataLogger {
 		if (logger != null)
 			return logger;
 		else {
-			String basename = String.format(Locale.ENGLISH, "log-ubi-%d.csv", System.currentTimeMillis());
+			String basename = String.format(Locale.ENGLISH, "%s-%d.csv", baseFilename, System.currentTimeMillis());
 
 			final String dirname;
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))

@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,18 +37,39 @@ public class MainActivity extends AppCompatActivity {
 				ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
 				ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
 
-			DataLogger dataLogger = new DataLogger(this);
-			GPSManager gpsManager = new GPSManager(this, dataLogger);
-			gpsManager.startLocationRequest();
+			DataLogger fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
+			GPSManager gpsManager = new GPSManager(this, fingerprintDataLogger);
+			setupButtons(gpsManager);
+
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
 			requestPermissions();
 		}
 	}
 
+	private void setupButtons(final GPSManager gpsManager) {
+		final Button btn_startCollectingWiFiFingerprints = findViewById(R.id.btn_start_collect_WiFi_fingerprints);
+		final Button btn_stopCollectingWiFiFingerprints = findViewById(R.id.btn_stop_collect_WiFi_fingerprints);
+		btn_stopCollectingWiFiFingerprints.setEnabled(false);
 
+		btn_startCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
 
+			@Override
+			public void onClick(View v) {
+				gpsManager.startLocationRequest();
+				btn_startCollectingWiFiFingerprints.setEnabled(false);
+				btn_stopCollectingWiFiFingerprints.setEnabled(true);
+			}
+		});
 
+		btn_stopCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
 
-
+			@Override
+			public void onClick(View v) {
+				gpsManager.stopLocationRequests();
+				btn_startCollectingWiFiFingerprints.setEnabled(true);
+				btn_stopCollectingWiFiFingerprints.setEnabled(false);
+			}
+		});
+	}
 }
