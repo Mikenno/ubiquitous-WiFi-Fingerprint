@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 			DataLogger dataLogger = new DataLogger(this);
 			GPSManager gpsManager = new GPSManager(this, dataLogger);
 			gpsManager.startLocationRequest();
-
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
 			requestPermissions();
