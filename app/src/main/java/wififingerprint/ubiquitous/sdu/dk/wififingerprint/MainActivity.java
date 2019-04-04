@@ -2,13 +2,21 @@ package wififingerprint.ubiquitous.sdu.dk.wififingerprint;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,23 +53,60 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-		// test application, presume granted
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+				ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+				ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+				ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
 
-		WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-		List<ScanResult> results =  wifiManager.getScanResults();
-		for (ScanResult result : results) {
-			log(getPrintableScanResult(result));
+			startLocationRequest();
+		} else {
+			// test application ... presume it was an unintended mistake not to accept
+			requestPermissions();
 		}
 	}
 
-	private String getPrintableScanResult(ScanResult scanResult) {
-		StringBuilder sb = new StringBuilder();
+	private void startLocationRequest() {
+		FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-		sb.append(scanResult.SSID);
-		sb.append(", ");
-		sb.append(scanResult.level);
+		LocationRequest locationRequest = LocationRequest.create();
+		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		locationRequest.setInterval(200);
+		locationRequest.setFastestInterval(100);
+		locationRequest.setMaxWaitTime(1000);
+		locationRequest.setSmallestDisplacement(0);
 
-		return sb.toString();
+		LocationCallback locationCallback = new LocationCallback() {
+			@Override
+			public void onLocationResult(LocationResult locationResult) {
+
+				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+				List<ScanResult> results =  wifiManager.getScanResults();
+
+				StringBuilder sb = new StringBuilder();
+				for (ScanResult result : results) {
+					sb.append(getLoggableScanResult(result));
+				}
+
+				log(String.format(Locale.ENGLISH, "%d, %s, %s", System.currentTimeMillis(), getLoggableLocationResult(locationResult), sb.toString()));
+			}
+		};
+
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+				ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+			fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+		}
+	}
+
+	private String getLoggableLocationResult(LocationResult locationResult) {
+		return String.format(Locale.ENGLISH, "%f, %f, %f, %f",
+				locationResult.getLastLocation().getAccuracy(),
+				locationResult.getLastLocation().getLatitude(),
+				locationResult.getLastLocation().getLongitude(),
+				locationResult.getLastLocation().getAltitude());
+	}
+
+	private String getLoggableScanResult(ScanResult scanResult) {
+		return String.format(Locale.ENGLISH, "%s, %d", scanResult.SSID, scanResult.level);
 	}
 
 	private void log(String message) {
