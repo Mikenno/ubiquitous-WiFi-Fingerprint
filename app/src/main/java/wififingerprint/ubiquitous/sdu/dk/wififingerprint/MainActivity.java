@@ -13,9 +13,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
+	DataLogger predictionResultsLogger;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 				ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
 
 			DataLogger fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
+			predictionResultsLogger = new DataLogger(this, "log-predictionResults");
 			GPSManager gpsManager = new GPSManager(this, fingerprintDataLogger);
 			setupButtons(gpsManager);
 		} else {
@@ -89,6 +93,11 @@ public class MainActivity extends AppCompatActivity {
 				List<ScanResult> results =  wifiManager.getScanResults();
 				List<WiFiFingerprint> kNearest = EmpericalDistance.getKNearest(results, gpsManager.getWiFiFingerprints(), 5);
 				Map<String, Double> predictedLocation = EmpericalDistance.getLocationPrediction(kNearest);
+				String predictions = predictedLocation.values().toString();
+				predictions = predictions.substring(1, predictions.length()-1);
+
+				predictionResultsLogger.log(String.format(Locale.ENGLISH, "%d, %s", System.currentTimeMillis(), predictions));
+
 				textView_predictedLocation.setText(predictedLocation.toString());
 			}
 		});
