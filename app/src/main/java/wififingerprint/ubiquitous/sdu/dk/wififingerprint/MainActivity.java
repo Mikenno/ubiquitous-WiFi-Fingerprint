@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 				List<ScanResult> results =  wifiManager.getScanResults();
-				List<WiFiFingerprint> kNearest = EmpericalDistance.getkNearest(results, gpsManager.getWiFiFingerprints(), 5);
+				List<WiFiFingerprint> kNearest = EmpericalDistance.getKNearest(results, gpsManager.getWiFiFingerprints(), 5);
 				Map<String, Double> predictedLocation = EmpericalDistance.getLocationPrediction(kNearest);
 				textView_predictedLocation.setText(predictedLocation.toString());
 			}
