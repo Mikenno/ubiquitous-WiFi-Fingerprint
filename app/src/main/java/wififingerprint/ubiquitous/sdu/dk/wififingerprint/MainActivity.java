@@ -1,10 +1,13 @@
 package wififingerprint.ubiquitous.sdu.dk.wififingerprint;
 
 import android.Manifest;
+import android.content.Context;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import java.io.BufferedWriter;
@@ -12,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
 				new String[] {
 						Manifest.permission.WRITE_EXTERNAL_STORAGE,
 						Manifest.permission.ACCESS_FINE_LOCATION,
-						Manifest.permission.ACCESS_COARSE_LOCATION
+						Manifest.permission.ACCESS_COARSE_LOCATION,
+						Manifest.permission.CHANGE_WIFI_STATE
 				},
 				0);
 	}
@@ -42,7 +47,21 @@ public class MainActivity extends AppCompatActivity {
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 		// test application, presume granted
 
-		// do stuff...
+		WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+		List<ScanResult> results =  wifiManager.getScanResults();
+		for (ScanResult result : results) {
+			log(getPrintableScanResult(result));
+		}
+	}
+
+	private String getPrintableScanResult(ScanResult scanResult) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(scanResult.SSID);
+		sb.append(", ");
+		sb.append(scanResult.level);
+
+		return sb.toString();
 	}
 
 	private void log(String message) {
