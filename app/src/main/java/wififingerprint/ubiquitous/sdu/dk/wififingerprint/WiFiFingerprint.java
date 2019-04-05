@@ -17,7 +17,7 @@ public class WiFiFingerprint {
 	}
 
 	private String getLoggableLocationResult(LocationResult locationResult) {
-		return String.format(Locale.ENGLISH, "%f, %f, %f, %f",
+		return String.format(Locale.ENGLISH, "%f,%f,%f,%f",
 				locationResult.getLastLocation().getAccuracy(),
 				locationResult.getLastLocation().getLatitude(),
 				locationResult.getLastLocation().getLongitude(),
@@ -27,9 +27,9 @@ public class WiFiFingerprint {
 	private String getLoggableScanResults(List<ScanResult> scanResults) {
 		StringBuilder sb = new StringBuilder();
 		for (ScanResult sr : scanResults) {
-			sb.append(String.format(Locale.ENGLISH, "%s, %d", sr.SSID, sr.level));
+			sb.append(String.format(Locale.ENGLISH, "%s,%d,", sr.BSSID, sr.level));
 		}
-		return sb.toString();
+		return sb.toString().substring(0, sb.length()-2);
 	}
 
 	public List<ScanResult> getScanResults() {
@@ -42,6 +42,6 @@ public class WiFiFingerprint {
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ENGLISH, "%s, %s", getLoggableLocationResult(locationResult), getLoggableScanResults(scanResults));
+		return String.format(Locale.ENGLISH, "%s,%s", getLoggableLocationResult(locationResult), getLoggableScanResults(scanResults));
 	}
 }

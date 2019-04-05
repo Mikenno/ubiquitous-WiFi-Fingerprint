@@ -39,7 +39,7 @@ public class EmpiricalDistance {
 			List<ScanResult> printScanResults = wifiFingerprint.getScanResults();
 
 			for (ScanResult sr : scanResults) {
-				ScanResult wifiScanResult = containsSSID(sr.SSID, printScanResults);
+				ScanResult wifiScanResult = containsSSID(sr.BSSID, printScanResults);
 				if(wifiScanResult != null) {
 					containedSSIDs++;
 					double distance = Math.pow((sr.level - wifiScanResult.level), 2);
@@ -68,26 +68,26 @@ public class EmpiricalDistance {
 
 		for (Double key : resultErrors.keySet()) {
 			sb.append(key);
-			sb.append(", ");
+			sb.append(",");
 			sb.append(resultErrors.get(key).toString());
-			sb.append(", ");
+			sb.append(",");
 		}
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 
-		dataLogger.log(String.format(Locale.ENGLISH, "kNearest_sorted_map, %s", sb.toString()));
+		dataLogger.log(String.format(Locale.ENGLISH, "kNearest_sorted_map,%s", sb.toString()));
 
 		String logResult = Arrays.deepToString(resultList.toArray());
 		logResult = logResult.substring(1, logResult.length()-1);
 
-		dataLogger.log(String.format(Locale.ENGLISH, "kNearest_result_list, %s", logResult));
+		dataLogger.log(String.format(Locale.ENGLISH, "kNearest_result_list,%s", logResult));
 
 		return resultList;
 	}
 
 	private ScanResult containsSSID(String SSID, List<ScanResult> scanResultsList) {
 		for (ScanResult sr : scanResultsList) {
-			if (sr.SSID.equals(SSID))
+			if (sr.BSSID.equals(SSID))
 				return sr;
 		}
 		return null;
@@ -116,12 +116,12 @@ public class EmpiricalDistance {
 		result.put("longitude", longitude);
 		result.put("altitude", altitude);
 
-		dataLogger.log(String.format(Locale.ENGLISH, "prediction_result, %s", getFormattedPredictionResult(result)));
+		dataLogger.log(String.format(Locale.ENGLISH, "prediction_result,%s", getFormattedPredictionResult(result)));
 
 		return result;
 	}
 
 	public String getFormattedPredictionResult(Map<String, Double> predictionResult) {
-		return String.format(Locale.ENGLISH, "Latitude, %s, Longitude, %s, Altitude, %s", predictionResult.get("latitude"), predictionResult.get("longitude"), predictionResult.get("altitude"));
+		return String.format(Locale.ENGLISH, "Latitude,%s,Longitude,%s,Altitude,%s", predictionResult.get("latitude"), predictionResult.get("longitude"), predictionResult.get("altitude"));
 	}
 }
