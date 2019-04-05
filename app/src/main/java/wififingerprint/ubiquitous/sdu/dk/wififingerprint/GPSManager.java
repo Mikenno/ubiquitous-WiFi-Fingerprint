@@ -3,8 +3,6 @@ package wififingerprint.ubiquitous.sdu.dk.wififingerprint;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 
@@ -14,29 +12,21 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class GPSManager {
+public abstract class GPSManager {
 	private Context context;
-	private DataLogger dataLogger;
 
 	private FusedLocationProviderClient fusedLocationClient;
 	private LocationRequest locationRequest;
 	private LocationCallback locationCallback;
 
-	private WifiManager wifiManager;
+	private boolean collecting;
 
-	private List<WiFiFingerprint> wiFiFingerprints;
-
-	public GPSManager(Context context, DataLogger dataLogger) {
+	public GPSManager(Context context) {
 		this.context = context;
-		this.dataLogger = dataLogger;
-		wiFiFingerprints = new ArrayList<>();
+		this.collecting = false;
 		initialize();
 	}
 	private void initialize() {
-		wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
@@ -50,28 +40,23 @@ public class GPSManager {
 		locationCallback = new LocationCallback() {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
-				List<ScanResult> results =  wifiManager.getScanResults();
-
-				WiFiFingerprint wiFiFingerprint = new WiFiFingerprint(locationResult, results);
-				wiFiFingerprints.add(wiFiFingerprint);
-
-				dataLogger.log(wiFiFingerprint.toString());
+				locationCallbackFunctionality(locationResult);
 			}
 		};
 	}
 
-	public void startLocationRequest() {
-		if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+	public void collectWiFiFingerprint() {
+		if (!collecting && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
 				ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 			fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+			collecting = true;
 		}
 	}
 
-	public void stopLocationRequests() {
+	protected void stopLocationRequests() {
 		fusedLocationClient.removeLocationUpdates(locationCallback);
+		collecting = false;
 	}
 
-	public List<WiFiFingerprint> getWiFiFingerprints() {
-		return wiFiFingerprints;
-	}
+	protected abstract void locationCallbackFunctionality(LocationResult locationResult);
 }

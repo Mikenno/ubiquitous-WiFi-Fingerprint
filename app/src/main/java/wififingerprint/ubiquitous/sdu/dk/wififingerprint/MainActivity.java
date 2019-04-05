@@ -12,13 +12,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.location.LocationResult;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+	WifiManager wifiManager;
 
 	DataLogger predictionResultsLogger;
+	DataLogger fingerprintDataLogger;
+
+	List<WiFiFingerprint> wiFiFingerprints;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +54,29 @@ public class MainActivity extends AppCompatActivity {
 				ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
 				ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED) {
 
-			DataLogger fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
+			final TextView receivedFingerPrint = findViewById(R.id.textView_collected_fingerprint);
+
 			predictionResultsLogger = new DataLogger(this, "log-predictionResults");
-			GPSManager gpsManager = new GPSManager(this, fingerprintDataLogger);
+			fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
+			wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+			wiFiFingerprints = new ArrayList<>();
+
+			GPSManager gpsManager = new GPSManager(this) {
+				@Override
+				public void locationCallbackFunctionality(LocationResult locationResult) {
+					List<ScanResult> results =  wifiManager.getScanResults();
+
+					WiFiFingerprint wiFiFingerprint = new WiFiFingerprint(locationResult, results);
+					wiFiFingerprints.add(wiFiFingerprint);
+
+					fingerprintDataLogger.log(wiFiFingerprint.toString());
+
+					receivedFingerPrint.setText(String.format(Locale.ENGLISH, "New WiFiFingerprint - Total=%d", wiFiFingerprints.size()));
+
+					stopLocationRequests();
+				}
+			};
+
 			setupButtons(gpsManager);
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
@@ -58,30 +85,16 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void setupButtons(final GPSManager gpsManager) {
-		final Button btn_startCollectingWiFiFingerprints = findViewById(R.id.btn_start_collect_WiFi_fingerprints);
-		final Button btn_stopCollectingWiFiFingerprints = findViewById(R.id.btn_stop_collect_WiFi_fingerprints);
-
+		final Button btn_startCollectingWiFiFingerprints = findViewById(R.id.btn_collect_WiFi_fingerprint);
 		final Button btn_predictPosition = findViewById(R.id.btn_predict_position);
-
 		final TextView textView_predictedLocation = findViewById(R.id.textView_predicted_location);
-
-		btn_stopCollectingWiFiFingerprints.setEnabled(false);
+		final TextView receivedFingerPrint = findViewById(R.id.textView_collected_fingerprint);
 
 		btn_startCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				gpsManager.startLocationRequest();
-				btn_startCollectingWiFiFingerprints.setEnabled(false);
-				btn_stopCollectingWiFiFingerprints.setEnabled(true);
-			}
-		});
-
-		btn_stopCollectingWiFiFingerprints.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				gpsManager.stopLocationRequests();
-				btn_startCollectingWiFiFingerprints.setEnabled(true);
-				btn_stopCollectingWiFiFingerprints.setEnabled(false);
+				receivedFingerPrint.setText("Collecting new WiFiFingerprint...");
+				gpsManager.collectWiFiFingerprint();
 			}
 		});
 
@@ -91,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 				List<ScanResult> results =  wifiManager.getScanResults();
-				List<WiFiFingerprint> kNearest = EmpericalDistance.getKNearest(results, gpsManager.getWiFiFingerprints(), 5);
+				List<WiFiFingerprint> kNearest = EmpericalDistance.getKNearest(results, wiFiFingerprints, 3);
 				Map<String, Double> predictedLocation = EmpericalDistance.getLocationPrediction(kNearest);
 				String predictions = predictedLocation.values().toString();
 				predictions = predictions.substring(1, predictions.length()-1);

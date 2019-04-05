@@ -17,33 +17,20 @@
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintHorizontal_bias="0.503"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/btn_stop_collect_WiFi_fingerprints" />
+		app:layout_constraintTop_toBottomOf="@+id/textView_collected_fingerprint" />
 
 	<Button
-		android:id="@+id/btn_start_collect_WiFi_fingerprints"
+		android:id="@+id/btn_collect_WiFi_fingerprint"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="8dp"
 		android:layout_marginTop="8dp"
 		android:layout_marginEnd="8dp"
-		android:text="[Start] Collect WiFi Fingerprints"
+		android:text="Collect WiFi Fingerprint"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintHorizontal_bias="0.505"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent" />
-
-	<Button
-		android:id="@+id/btn_stop_collect_WiFi_fingerprints"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginStart="8dp"
-		android:layout_marginTop="8dp"
-		android:layout_marginEnd="8dp"
-		android:text="[STOP] Collect WiFi Fingerprints"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintHorizontal_bias="0.504"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/btn_start_collect_WiFi_fingerprints" />
 
 	<TextView
 		android:id="@+id/textView"
@@ -69,4 +56,13 @@
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+	<TextView
+		android:id="@+id/textView_collected_fingerprint"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="..."
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/btn_collect_WiFi_fingerprint" />
 </android.support.constraint.ConstraintLayout>
