@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				receivedFingerPrint.setText("Collecting new WiFiFingerprint...");
 				if(!wifiManager.startScan()) {
-					Toast.makeText(null, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
+					Toast.makeText(MainActivity.this, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
 					receivedFingerPrint.setText("Scan failed, try again soon");
 					return;
 				}
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 				if(!wifiManager.startScan()) {
-					Toast.makeText(null, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
+					Toast.makeText(MainActivity.this, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
 					return;
 				}
 				List<ScanResult> results =  wifiManager.getScanResults();
