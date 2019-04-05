@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.LocationResult;
 
@@ -82,16 +83,6 @@ public class MainActivity extends AppCompatActivity {
 			};
 
 			setupButtons(gpsManager);
-
-			TimerTask timerTask = new TimerTask() {
-				@Override
-				public void run() {
-					wifiManager.startScan();
-				}
-			};
-
-			Timer timer = new Timer();
-			timer.scheduleAtFixedRate(timerTask, 0, 30001);
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
 			requestPermissions();
@@ -108,6 +99,11 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				receivedFingerPrint.setText("Collecting new WiFiFingerprint...");
+				if(!wifiManager.startScan()) {
+					Toast.makeText(null, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
+					receivedFingerPrint.setText("Scan failed, try again soon");
+					return;
+				}
 				gpsManager.collectWiFiFingerprint();
 			}
 		});
@@ -117,6 +113,10 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
+				if(!wifiManager.startScan()) {
+					Toast.makeText(null, "Wifi scanner not yet ready, please try again soon", Toast.LENGTH_SHORT).show();
+					return;
+				}
 				List<ScanResult> results =  wifiManager.getScanResults();
 				List<WiFiFingerprint> kNearest = EmpiricalDistance.getEmpiricalDistance(empiricalDataLogger).getKNearest(results, wiFiFingerprints, 3);
 				Map<String, Double> predictedLocation = EmpiricalDistance.getEmpiricalDistance(empiricalDataLogger).getLocationPrediction(kNearest);
