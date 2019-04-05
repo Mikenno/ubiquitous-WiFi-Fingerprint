@@ -82,6 +82,16 @@ public class MainActivity extends AppCompatActivity {
 			};
 
 			setupButtons(gpsManager);
+
+			TimerTask timerTask = new TimerTask() {
+				@Override
+				public void run() {
+					wifiManager.startScan();
+				}
+			};
+
+			Timer timer = new Timer();
+			timer.scheduleAtFixedRate(timerTask, 0, 30001);
 		} else {
 			// test application ... presume it was an unintended mistake not to accept
 			requestPermissions();
