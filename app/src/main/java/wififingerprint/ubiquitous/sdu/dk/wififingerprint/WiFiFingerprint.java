@@ -42,6 +42,6 @@ public class WiFiFingerprint {
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ENGLISH, "%d, %s, %s", System.currentTimeMillis(), getLoggableLocationResult(locationResult), getLoggableScanResults(scanResults));
+		return String.format(Locale.ENGLISH, "%s, %s", getLoggableLocationResult(locationResult), getLoggableScanResults(scanResults));
 	}
 }

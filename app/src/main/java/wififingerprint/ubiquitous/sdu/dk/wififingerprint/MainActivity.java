@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
 	DataLogger predictionResultsLogger;
 	DataLogger fingerprintDataLogger;
+	DataLogger empiricalDataLogger;
 
 	List<WiFiFingerprint> wiFiFingerprints;
 
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
 			predictionResultsLogger = new DataLogger(this, "log-predictionResults");
 			fingerprintDataLogger = new DataLogger(this, "log-fingerprints");
+			empiricalDataLogger = new DataLogger(this, "log-empirical");
 			wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 			wiFiFingerprints = new ArrayList<>();
 
@@ -104,14 +106,14 @@ public class MainActivity extends AppCompatActivity {
 				WifiManager wifiManager = (WifiManager) MainActivity.this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
 				List<ScanResult> results =  wifiManager.getScanResults();
-				List<WiFiFingerprint> kNearest = EmpericalDistance.getKNearest(results, wiFiFingerprints, 3);
-				Map<String, Double> predictedLocation = EmpericalDistance.getLocationPrediction(kNearest);
+				List<WiFiFingerprint> kNearest = EmpiricalDistance.getEmpiricalDistance(empiricalDataLogger).getKNearest(results, wiFiFingerprints, 3);
+				Map<String, Double> predictedLocation = EmpiricalDistance.getEmpiricalDistance(empiricalDataLogger).getLocationPrediction(kNearest);
 				String predictions = predictedLocation.values().toString();
 				predictions = predictions.substring(1, predictions.length()-1);
 
-				predictionResultsLogger.log(String.format(Locale.ENGLISH, "%d, %s", System.currentTimeMillis(), predictions));
+				predictionResultsLogger.log(predictions);
 
-				textView_predictedLocation.setText(predictedLocation.toString());
+				textView_predictedLocation.setText(EmpiricalDistance.getEmpiricalDistance(empiricalDataLogger).getFormattedPredictionResult(predictedLocation));
 			}
 		});
 	}

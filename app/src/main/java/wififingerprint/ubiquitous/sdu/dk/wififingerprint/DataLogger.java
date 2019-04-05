@@ -24,6 +24,7 @@ public class DataLogger {
 
 	public void log(String message) {
 		PrintWriter logger = getLogger();
+		message = String.format(Locale.ENGLISH, "%d, %s", System.currentTimeMillis(), message);
 		Log.d(TAG, message);
 		if (logger != null) {
 			logger.println(message);
